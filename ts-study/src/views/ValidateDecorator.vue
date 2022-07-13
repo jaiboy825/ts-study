@@ -35,6 +35,7 @@
 
 <script lang="ts">
 import { Vue } from "vue-class-component";
+import "reflect-metadata";
 enum validType {
   English = "English",
   Korean = "Korean",
@@ -59,18 +60,72 @@ enum regex {
   // eslint-disable-next-line
   Password = "^(?=.*[A-Za-z])(?=.*d)(?=.*[@$!%*#?&])[A-Za-zd@$!%*#?&]{8,}$",
 }
+const checkCapitalMetadataKey = Symbol("CheckValidate");
 
-function validateDecorator() {
-  return function (t: any, pk: string, d: PropertyDescriptor) {
-    const method = d.value;
-    d.value = function () {
-      try {
-        method();
-      } catch (error) {
-        console.log(error);
+function validateDecorator(
+  target: any,
+  propertyName: string,
+  descriptor: TypedPropertyDescriptor<any>
+) {
+  let method = descriptor.value;
+  descriptor.value = function () {
+    let capitalParameters: number[] = Reflect.getOwnMetadata(
+      checkCapitalMetadataKey,
+      target,
+      propertyName
+    ); //metadata에서
+    // CheckValidate Symbol metadata 키를 가지고,
+    // 멤버에 대한 생성자 함수, 프로토타입 타겟에
+    // checkValidate라는 property 키를 가진 애를 가져오기~
+    if (capitalParameters) {
+      // metadata에 저장이 되어있으면 ?
+      for (let parameterIndex of capitalParameters) {
+        //루프를 돌려~
+        let regex_text = ""; // 정규식 문자 text
+        switch (arguments[parameterIndex].type) {
+          case validType.English:
+            regex_text = regex.English;
+            break;
+          case validType.Korean:
+            regex_text = regex.Korean;
+            break;
+          case validType.Number:
+            regex_text = regex.Number;
+            break;
+          case validType.Email:
+            regex_text = regex.Email;
+            break;
+          case validType.Password:
+            regex_text = regex.Password;
+            break;
+          default:
+            break;
+        }
+        const reg = new RegExp(regex_text); // 정규식 test용 객체 생성
+        arguments[parameterIndex].status = reg.test(
+          arguments[parameterIndex].value
+        ); //정규식 성공 여부를 해당 아이템 status에 설정
       }
-    };
+    }
+    return method!.apply(this, arguments); //함수에 단일 배열 전달~
   };
+}
+
+function parameterDecorator(
+  target: any,
+  propertyKey: string | symbol,
+  parameterIndex: number
+) {
+  let existingCapitalParameters: number[] =
+    Reflect.getOwnMetadata(checkCapitalMetadataKey, target, propertyKey) || [];
+  existingCapitalParameters.push(parameterIndex); //metadata에서 가져온 배열에 해당 매개변수 인덱스를 담아주기
+  Reflect.defineMetadata(
+    checkCapitalMetadataKey,
+    existingCapitalParameters,
+    target,
+    propertyKey
+  );
+  // 데코레이터 내부에 metadata 정의
 }
 
 export default class Decorator extends Vue {
@@ -114,39 +169,9 @@ export default class Decorator extends Vue {
     },
   ];
 
-  checkValidate = (item: validItem) => {
-    switch (item.type) {
-      case validType.English:
-        Decorator.regex = regex.English;
-        break;
-      case validType.Korean:
-        Decorator.regex = regex.Korean;
-        break;
-      case validType.Number:
-        Decorator.regex = regex.Number;
-        break;
-      case validType.Email:
-        Decorator.regex = regex.Email;
-        break;
-      case validType.Password:
-        Decorator.regex = regex.Password;
-        break;
-      default:
-        break;
-    }
-    Decorator.item = item;
-    this.validate.map((x) => {
-      if (x.id == item.id) {
-        return this.validating();
-      }
-    });
-  };
-
-  @validateDecorator()
-  validating() {
-    const reg = new RegExp(Decorator.regex);
-    Decorator.item.status = reg.test(Decorator.item.value);
-    return Decorator.item;
+  @validateDecorator
+  checkValidate(@parameterDecorator item: validItem): void {
+    console.log(item);
   }
 }
 </script>
