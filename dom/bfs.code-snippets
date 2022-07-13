@@ -1,0 +1,27 @@
+{
+  "jaiboy_bfs": {
+    "scope": "typescript, javascript",
+    "prefix": "dom_bfs",
+    "body": [
+      "function bfs(element) {",
+      "  if(!element) {",
+	  "    return;",
+	  "  }",
+	  "  let tempList = [];",
+	  "  tempList.push(element);",
+	  "  while (tempList.length) {",
+	  "    let node = tempList.shift();",
+	  "    console.log({",
+	  "      nodeName: node.nodeName,",
+	  "      id: node.id,",
+	  "      class: node.className,",
+	  "    });",
+	  "    for(let i = 0; i < node.children.length; i++)",
+	  "    tempList.push(node.children[i]);",
+	  "  }",
+	  "}",
+      "bfs(document.body);"
+    ],
+    "description": "Breadth First Search"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "jaiboy_dfs": {
+    "scope": "typescript, javascript",
+    "prefix": "dom_dfs",
+    "body": [
+      "function dfs(node) {",
+	  "  console.log({",
+	  "    nodeName: node.nodeName,",
+	  "    id: node.id,",
+	  "    class: node.className,",
+	  "  });",
+	  "  for (let i = 0; i < node.children.length; i++) {",
+	  "    dfs(node.children[i]);",
+	  "  }",
+      "}\n",
+      "dfs(document.body);"
+    ],
+    "description": "Depth First Search"
+  }
+}
