@@ -58,7 +58,7 @@ enum regex {
   Number = "^[0-9]*$",
   Email = "^([A-Z|a-z|0-9](.|_){0,1})+[A-Z|a-z|0-9]@([A-Z|a-z|0-9])+((.){0,1}[A-Z|a-z|0-9]){2}.[a-z]{2,3}$",
   // eslint-disable-next-line
-  Password = "^(?=.*[A-Za-z])(?=.*d)(?=.*[@$!%*#?&])[A-Za-zd@$!%*#?&]{8,}$",
+  Password = "^(?=.*[A-Za-z])(?=.*d)(?=.*[@$!%*#?&])[A-Za-zd0-9@$!%*#?&]{8,}$",
 }
 const checkCapitalMetadataKey = Symbol("CheckValidate");
 
